@@ -88,6 +88,7 @@ J-Link but any should work.
   7 (SWDIO) | SWD
   9 (SWCLK) | SWC
 ```
+![](/pics/j-link-connector.png)
 
 2. Run OpenOCD: `openocd -f interface/jlink.cfg -c 'transport select swd' -f target/stm32g4x.cfg`
 
