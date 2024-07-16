@@ -21,26 +21,48 @@ The device ships with
 [firmware](https://github.com/normaldotcom/canable2-fw) suitable for
 use with [slcand](https://github.com/linux-can/can-utils/).
 
-To switch to candleLight:
 
-1. Unplug from USB, install a jumper at BOOT, plug back in.  Run `lsusb`,
-it should show up like this:
+## One-time setup - compile the firmware
+
+Do this once, then keep the firmware image around to flash as many
+devices as you want.
+
+1. Clone the firmware source repo: `git clone https://github.com/pgreenland/candleLight_fw.git`
+
+2. `cd candleLight_fw`
+
+3. Check out the `multichannel` branch (there is a
+[PR](https://github.com/candle-usb/candleLight_fw/pull/176) to merge
+this into mainline but it hasn't landed yet): `git checkout multichannel`
+
+4. Install the build dependencies: `sudo apt install gcc-arm-none-eabi`
+
+5. Build the firmware:
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/gcc-arm-none-eabi-8-2019-q3-update.cmake
+make CANable2_MKS_fw
+```
+
+If that all works, you never have to do it again.
+
+
+## Flash the device
+
+1. Unplug from USB, install a jumper at BOOT, plug back in to USB.
+Run `lsusb`, it should show up like this:
 ```
   Bus 001 Device 101: ID 0483:df11 STMicroelectronics STM Device in DFU Mode
 ```
 
-3. Clone <https://github.com/pgreenland/candleLight_fw.git>
+2. Flash the firmware.  Make sure you're in the `candleLight_fw/build`
+directory where you originally built the firmware image above, then run:
+`make flash-CANable2_MKS_fw`.  This may print an error, `dfu-util:
+can't detach`, but that's ok (see below).
 
-4. Check out the `multichannel` branch (there is a
-[PR](https://github.com/candle-usb/candleLight_fw/pull/176) to merge
-this into mainline but it hasn't landed yet).
-
-5. Build per the instructions in the candleLight README
-
-6. Flash: `make flash-CANable2_MKS_fw`.  This will print an error,
-`dfu-util: can't detach`, but that's ok (see below).
-
-7. Unplug, remove BOOT jumper, re-connect.  lsusb should show this:
+3. Unplug from USB, remove BOOT jumper, re-connect USB.  `lsusb` should
+show this:
 ```
   Bus 001 Device 102: ID 1d50:606f OpenMoko, Inc. Geschwister Schneider CAN adapter
 ```
@@ -78,8 +100,11 @@ If you want the board to boot into the candleLight firmware every time it
 resets, no matter how short the duration of the reset, you can reprogram
 the Flash Option Bytes of the STM32 using these steps:
 
-1. Connect a Single Wire Debug (SWD) probe to the board.  I use a Segger
-J-Link but any should work.
+1. Install required programs (you only have to do this on each computer
+you want to be able to flash): `sudo apt install openocd netcat-openbsd`
+
+2. Connect a Single Wire Debug (SWD) probe to the CANable2 PRO board.
+I use a Segger J-Link but any should work.
 ```
   J-Link    | CANable
   ----------+-------
@@ -90,6 +115,11 @@ J-Link but any should work.
 ```
 ![](/pics/j-link-connector.png)
 
-2. Run OpenOCD: `openocd -f interface/jlink.cfg -c 'transport select swd' -f target/stm32g4x.cfg`
+3. Make sure the CANable2 is connected to USB.
 
-3. Send the command list to the OpenOCD server: `nc -N localhost 4444 < disable-boot-jumper.cfg`
+4. Run OpenOCD (this will keep running until you stop it with
+Ctrl-C): `openocd -f interface/jlink.cfg -c 'transport select swd'
+-f target/stm32g4x.cfg`
+
+5. In a different terminal, send the command list to the OpenOCD server:
+`nc -N localhost 4444 < disable-boot-jumper.cfg`
