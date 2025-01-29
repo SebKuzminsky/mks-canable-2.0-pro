@@ -115,7 +115,7 @@ I use a Segger J-Link but any should work.
 ```
 ![](/pics/j-link-connector.png)
 
-3. Make sure the CANable2 is connected to USB.
+3. Make sure the CANable2 and J-Link are both connected to USB.
 
 4. Run OpenOCD (this will keep running until you stop it with
 Ctrl-C): `openocd -f interface/jlink.cfg -c 'transport select swd'
