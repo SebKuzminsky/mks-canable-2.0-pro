@@ -98,16 +98,48 @@ you reset it, you can ignore this issue.
 
 If you want the board to boot into the candleLight firmware every time it
 resets, no matter how short the duration of the reset, you can reprogram
-the Flash Option Bytes of the STM32 using these steps:
+the Flash Option Bytes of the STM32.  To do this you need an SWD debug
+probe.  Below are instructions for using the Raspberry Pi Debug Probe
+or the Segger J-Link.
+
+
+## Raspberry Pi Debug Probe
+
+NOTE: This doesn't quite work yet, use the Segger J-link for now :-(
 
 1. Install required programs (you only have to do this on each computer
 you want to be able to flash): `sudo apt install openocd netcat-openbsd`
 
 2. Connect a Single Wire Debug (SWD) probe to the CANable2 PRO board.
-I use a Segger J-Link but any should work.
+```
+  Debug Probe | CANable
+  ------------+---------
+              | 3.3V
+  Black       | GND
+  Yellow      | SWD
+  Orange      | SWC
+```
+![](/pics/j-link-connector.png)
+
+3. Make sure the CANable2 and the Debug Probe are both connected to USB.
+
+4. Run OpenOCD (this will keep running until you stop it with Ctrl-C):
+`openocd -f interface/cmsis-dap.cfg -c 'transport select swd' -f
+target/stm32g4x.cfg`
+
+5. In a different terminal, send the command list to the OpenOCD server:
+`nc -N localhost 4444 < disable-boot-jumper.cfg`
+
+
+## Segger J-Link
+
+1. Install required programs (you only have to do this on each computer
+you want to be able to flash): `sudo apt install openocd netcat-openbsd`
+
+2. Connect a Single Wire Debug (SWD) probe to the CANable2 PRO board.
 ```
   J-Link    | CANable
-  ----------+-------
+  ----------+---------
   1 (Vtref) | 3.3V
   4 (GND)   | GND
   7 (SWDIO) | SWD
@@ -123,3 +155,10 @@ Ctrl-C): `openocd -f interface/jlink.cfg -c 'transport select swd'
 
 5. In a different terminal, send the command list to the OpenOCD server:
 `nc -N localhost 4444 < disable-boot-jumper.cfg`
+
+
+# To do
+
+Better enclosure, the screws should not protrude past the bottom surface
+
+Use Raspberry Pi Debug Probe ($12) instead of Segger J-link ($500)
