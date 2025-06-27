@@ -35,7 +35,7 @@ devices as you want.
 [PR](https://github.com/candle-usb/candleLight_fw/pull/176) to merge
 this into mainline but it hasn't landed yet): `git checkout multichannel`
 
-4. Install the build dependencies: `sudo apt install gcc-arm-none-eabi dfu-util`
+4. Install the build dependencies: `sudo apt install gcc-arm-none-eabi dfu-util cmake`
 
 5. Build the firmware:
 ```
